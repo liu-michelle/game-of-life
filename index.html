@@ -1,113 +1,174 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>Map Music & Path Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway's Game of Life</title>
     <style>
+      canvas {
+        border: 1px solid black;
+        cursor: pointer;
+      }
       body {
         font-family: Arial, sans-serif;
-        margin: 0;
+        text-align: center;
         padding: 20px;
-        background: #f0f0f0;
       }
-      h1 {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      #map {
-        height: 500px;
-        width: 100%;
-        max-width: 800px;
-        margin: 0 auto;
-        border: 2px solid #ccc;
-      }
-      #coords {
-        text-align: center;
-        margin-top: 10px;
-        font-size: 18px;
-        background: rgba(255, 255, 255, 0.9);
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 4px;
+      button {
+        margin: 5px;
+        padding: 10px 20px;
       }
     </style>
   </head>
   <body>
-    <h1>Map Music & Path Tracker</h1>
-    <div id="map"></div>
-    <div id="coords">Lat: --, Lng: --</div>
+    <h1>Conway's Game of Life</h1>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <br />
+    <button id="startButton">Start</button>
+    <button id="pauseButton">Pause</button>
+    <button id="restartButton">Restart</button>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Tone JS -->
     <script src="https://unpkg.com/tone/build/Tone.js"></script>
+    
     <script>
-      // Create the map and center it over New York City.
-      var map = L.map("map").setView([40.7128, -74.0060], 13);
-      L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-        maxZoom: 17,
-        attribution:
-          'Map data: &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-          '<a href="http://viewfinderpanoramas.org">SRTM</a> | ' +
-          'Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> ' +
-          '(<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-      }).addTo(map);
+      // Conway's Game of Life code is from here: https://www.geeksforgeeks.org/conways-game-of-life-in-javascript/
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
 
-      // Create a marker that follows the mouse.
-      var hoverMarker = L.marker([40.7128, -74.0060]).addTo(map);
-      var coordsDiv = document.getElementById("coords");
+      // Define cell size and grid dimensions
+      const cellSize = 10;
+      const numRows = Math.floor(canvas.height / cellSize);
+      const numCols = Math.floor(canvas.width / cellSize);
 
-      // Create a polyline to draw the path
-      var pathCoordinates = [];
-      var polyline = L.polyline(pathCoordinates, { color: 'red' }).addTo(map);
-
-      // Create a Tone.js synth and connect it to the destination.
-      const synth = new Tone.Synth().toDestination();
-
-      // Throttle note triggering to prevent overwhelming sound events.
-      let lastTriggerTime = 0;
-      const triggerInterval = 200; // in milliseconds
-
-      // Utility function to map a number from one range to another.
-      function mapRange(value, inMin, inMax, outMin, outMax) {
-        return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - inMin);
+      // Function to initialize the grid
+      function createGrid() {
+          const grid = [];
+          for (let i = 0; i < numRows; i++) {
+              grid[i] = [];
+              for (let j = 0; j < numCols; j++) {
+                  grid[i][j] = Math.random() > 0.7 ? 1 : 0; // Random initialization (30% chance alive)
+              }
+          }
+          return grid;
       }
 
-      // On mouse move over the map, update marker position, draw path, display coordinates, and trigger a note.
-      map.on("mousemove", function (e) {
-        // Update marker location.
-        hoverMarker.setLatLng(e.latlng);
+      let grid = createGrid();
+      let isRunning = false;
+      let animationId = null;
 
-        // Update coordinate display.
-        coordsDiv.textContent =
-          "Lat: " +
-          e.latlng.lat.toFixed(4) +
-          ", Lng: " +
-          e.latlng.lng.toFixed(4);
+      // Function to draw the grid on canvas
+      function drawGrid() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (let i = 0; i < numRows; i++) {
+              for (let j = 0; j < numCols; j++) {
+                  if (grid[i][j] === 1) {
+                      ctx.fillStyle = 'black';
+                      ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+                  }
+              }
+          }
+      }
 
-        // Add new point to the path.
-        pathCoordinates.push(e.latlng);
-        polyline.setLatLngs(pathCoordinates);
+      // Function to update the grid based on Conway's rules
+      function updateGrid() {
+          const newGrid = [];
+          for (let i = 0; i < numRows; i++) {
+              newGrid[i] = [];
+              for (let j = 0; j < numCols; j++) {
+                  const neighbors = countNeighbors(i, j);
+                  if (grid[i][j] === 1 && (neighbors < 2 || neighbors > 3)) {
+                      newGrid[i][j] = 0; // Underpopulation or overpopulation
+                  } else if (grid[i][j] === 0 && neighbors === 3) {
+                      newGrid[i][j] = 1; // Reproduction
+                  } else {
+                      newGrid[i][j] = grid[i][j]; // Unchanged
+                  }
+              }
+          }
+          grid = newGrid;
+      }
 
-        // Throttle note triggering.
-        const now = Date.now();
-        if (now - lastTriggerTime > triggerInterval) {
-          lastTriggerTime = now;
+      // Function to count live neighbors of a cell
+      function countNeighbors(row, col) {
+          let count = 0;
+          for (let i = -1; i <= 1; i++) {
+              for (let j = -1; j <= 1; j++) {
+                  const r = row + i;
+                  const c = col + j;
+                  if (r >= 0 && r < numRows && c >= 0 && c < numCols && !(i === 0 && j === 0)) {
+                      count += grid[r][c];
+                  }
+              }
+          }
+          return count;
+      }
 
-          // Map latitude (-90 to 90) to frequency (200 Hz to 1000 Hz).
-          const freq = mapRange(e.latlng.lat, -90, 90, 200, 1000);
-
-          // Map longitude (-180 to 180) to a detune value (-50 to 50 cents).
-          const detune = mapRange(e.latlng.lng, -180, 180, -50, 50);
-          synth.detune.value = detune;
-
-          // Trigger a short note.
-          synth.triggerAttackRelease(freq, "8n", undefined, 0.5);
-        }
+      // Allow user to toggle cells by clicking on the canvas
+      canvas.addEventListener('click', function(event) {
+          const rect = canvas.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          const col = Math.floor(x / cellSize);
+          const row = Math.floor(y / cellSize);
+          // Toggle the state of the clicked cell
+          grid[row][col] = grid[row][col] === 1 ? 0 : 1;
+          drawGrid();
       });
+
+      // Create a Tone.js synth to generate sound
+      const synth = new Tone.Synth().toDestination();
+
+      // Map the count of live cells to a frequency between 200 Hz and 800 Hz
+      function mapAliveToFreq(aliveCount) {
+          const totalCells = numRows * numCols;
+          const minFreq = 200;
+          const maxFreq = 800;
+          return minFreq + (aliveCount / totalCells) * (maxFreq - minFreq);
+      }
+
+      // Main loop: update grid, draw grid, and trigger sound based on live cell density
+      function mainLoop() {
+          // Count live cells
+          let aliveCount = 0;
+          for (let i = 0; i < numRows; i++) {
+              for (let j = 0; j < numCols; j++) {
+                  if (grid[i][j] === 1) aliveCount++;
+              }
+          }
+          // Map the live cell count to a frequency and trigger a short note ("8n" duration)
+          const freq = mapAliveToFreq(aliveCount);
+          synth.triggerAttackRelease(freq, "8n");
+
+          updateGrid();
+          drawGrid();
+
+          if (isRunning) {
+              animationId = requestAnimationFrame(mainLoop);
+          }
+      }
+
+      document.getElementById('startButton').addEventListener('click', function() {
+          if (!isRunning) {
+              isRunning = true;
+              mainLoop();
+          }
+      });
+
+      document.getElementById('pauseButton').addEventListener('click', function() {
+          isRunning = false;
+          cancelAnimationFrame(animationId);
+      });
+
+      document.getElementById('restartButton').addEventListener('click', function() {
+          isRunning = false;
+          cancelAnimationFrame(animationId);
+          grid = createGrid();
+          drawGrid();
+      });
+
+      // Initial draw
+      drawGrid();
     </script>
   </body>
 </html>
