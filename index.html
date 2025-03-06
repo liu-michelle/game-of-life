@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conway's Game of Life</title>
+    <title>Game of Life</title>
     <style>
       canvas {
         border: 1px solid white;
@@ -40,7 +40,7 @@
       #rulesButton:checked~.rules {
         display: block;
       }
-      
+
       label[for="rulesButton"] {
         display: inline-block;
         padding: 10px 20px;
@@ -49,16 +49,15 @@
         cursor: pointer;
         transition: background-color 0.3s, color 0.3s;
       }
-      
+
       label[for="rulesButton"]:hover {
         background-color: white;
         color: black;
       }
-      
     </style>
   </head>
   <body>
-    <h1>Conway's Game of Life</h1>
+    <h1>Game of Life</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <br />
     <input type="checkbox" id="rulesButton" style="display: none;">
@@ -81,6 +80,9 @@
       <p>
         4. A dead cell will be brought back to live if it has exactly three live neighbors.
       </p>
+    </div>
+    <div id="count">
+      count
     </div>
 
     <script src="https://unpkg.com/tone/build/Tone.js"></script>
@@ -109,12 +111,13 @@
       let isRunning = false;
       let animationId = null;
 
-      function drawGrid() {
+      function drawGrid(color) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let i = 0; i < numRows; i++) {
           for (let j = 0; j < numCols; j++) {
             if (grid[i][j] === 1) {
-              ctx.fillStyle = 'white';
+
+              ctx.fillStyle = color;
               ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
             }
           }
@@ -160,16 +163,19 @@
         const col = Math.floor(x / cellSize);
         const row = Math.floor(y / cellSize);
         grid[row][col] = grid[row][col] === 1 ? 0 : 1;
-        drawGrid();
+        drawGrid("white");
       });
 
       const synth = new Tone.Synth().toDestination();
 
-      function mapAliveToFreq(aliveCount) {
+      function map(aliveCount) {
         const totalCells = numRows * numCols;
-        const minFreq = 200;
-        const maxFreq = 1000;
-        return minFreq + (aliveCount / totalCells) * (maxFreq - minFreq);
+        let notes = [
+          'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
+          'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+          'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
+        ]
+        return notes[aliveCount % 100];
       }
 
       function mainLoop() {
@@ -179,11 +185,15 @@
             if (grid[i][j] === 1) aliveCount++;
           }
         }
-        const freq = mapAliveToFreq(aliveCount);
-        synth.triggerAttackRelease(freq, "8n");
+        const freq = map(aliveCount);
+        synth.triggerAttackRelease(freq, "16n");
 
         updateGrid();
-        drawGrid();
+        color = "rgba(255, 255, 255," + aliveCount / 800 + ")";
+
+        const count = document.getElementById("count");
+        count.textContent = aliveCount;
+        drawGrid(color);
 
         if (isRunning) {
           animationId = requestAnimationFrame(mainLoop);
@@ -206,10 +216,10 @@
         isRunning = false;
         cancelAnimationFrame(animationId);
         grid = createGrid();
-        drawGrid();
+        drawGrid("white");
       });
 
-      drawGrid();
+      drawGrid("white");
     </script>
   </body>
 </html>
