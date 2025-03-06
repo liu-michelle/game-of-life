@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>♪Game of Life♪</title>
+    <title>♪ Game of Life ♪</title>
     <style>
       canvas {
         border: 1px solid white;
@@ -89,10 +89,11 @@
       #speed:hover {
         opacity: 1;
       }
+      
     </style>
   </head>
   <body>
-    <h1>Game of Life ♪</h1>
+    <h1>♪ Game of Life ♪</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <br />
     <input type="checkbox" id="rulesButton" style="display: none;">
@@ -145,7 +146,6 @@
 
       let grid = createGrid();
       let isRunning = false;
-      let animationId = null;
 
       function drawGrid(color) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -211,7 +211,7 @@
           'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
           'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
         ]
-        return notes[aliveCount % 100];
+        return notes[aliveCount % 10];
       }
 
       function mainLoop() {
@@ -222,7 +222,7 @@
           }
         }
         const freq = map(aliveCount);
-        synth.triggerAttackRelease(freq, "16n");
+        synth.triggerAttackRelease(freq, "4n");
 
         updateGrid();
         color = "rgba(255, 255, 255," + aliveCount / 800 + ")";
