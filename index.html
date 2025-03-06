@@ -7,167 +7,208 @@
     <title>Conway's Game of Life</title>
     <style>
       canvas {
-        border: 1px solid black;
+        border: 1px solid white;
         cursor: pointer;
       }
+
       body {
-        font-family: Arial, sans-serif;
+        font-family: Monospace, sans-serif;
         text-align: center;
         padding: 20px;
+        background-color: black;
+        color: white;
       }
+
       button {
+        font-family: Monospace, sans-serif;
         margin: 5px;
         padding: 10px 20px;
+        background-color: black;
+        color: white;
       }
+
+      button:hover {
+        background-color: white;
+        color: black;
+        filter: drop-shadow(3px 2px 2px gray);
+      }
+
+      .rules {
+        display: none;
+      }
+
+      #rulesButton:checked~.rules {
+        display: block;
+      }
+      
+      label[for="rulesButton"] {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: black;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      
+      label[for="rulesButton"]:hover {
+        background-color: white;
+        color: black;
+      }
+      
     </style>
   </head>
   <body>
     <h1>Conway's Game of Life</h1>
     <canvas id="gameCanvas" width="600" height="400"></canvas>
     <br />
+    <input type="checkbox" id="rulesButton" style="display: none;">
+    <label for="rulesButton">Rules</label>
     <button id="startButton">Start</button>
     <button id="pauseButton">Pause</button>
     <button id="restartButton">Restart</button>
+    <div class="rules">
+      <!-- Rules are from this link: https://beltoforion.de/en/game_of_life/ -->
+      <p>In the <i>Game of Life</i> each grid cell can have either one of two states: <b>dead or alive</b>. <i>The Game of Life</i> is controlled by <b>four</b> simple rules which are applied to each grid cell in the simulation domain:</p>
+      <p>
+        1. A live cell dies if it has fewer than two live neighbors.
+      </p>
+      <p>
+        2. A live cell with two or three live neighbors lives on to the next generation.
+      </p>
+      <p>
+        3. A live cell with more than three live neighbors dies.
+      </p>
+      <p>
+        4. A dead cell will be brought back to live if it has exactly three live neighbors.
+      </p>
+    </div>
 
     <script src="https://unpkg.com/tone/build/Tone.js"></script>
-    
+
     <script>
       // Conway's Game of Life code is from here: https://www.geeksforgeeks.org/conways-game-of-life-in-javascript/
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
 
-      // Define cell size and grid dimensions
       const cellSize = 10;
       const numRows = Math.floor(canvas.height / cellSize);
       const numCols = Math.floor(canvas.width / cellSize);
 
-      // Function to initialize the grid
       function createGrid() {
-          const grid = [];
-          for (let i = 0; i < numRows; i++) {
-              grid[i] = [];
-              for (let j = 0; j < numCols; j++) {
-                  grid[i][j] = Math.random() > 0.7 ? 1 : 0; // Random initialization (30% chance alive)
-              }
+        const grid = [];
+        for (let i = 0; i < numRows; i++) {
+          grid[i] = [];
+          for (let j = 0; j < numCols; j++) {
+            grid[i][j] = Math.random() > 0.7 ? 1 : 0;
           }
-          return grid;
+        }
+        return grid;
       }
 
       let grid = createGrid();
       let isRunning = false;
       let animationId = null;
 
-      // Function to draw the grid on canvas
       function drawGrid() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          for (let i = 0; i < numRows; i++) {
-              for (let j = 0; j < numCols; j++) {
-                  if (grid[i][j] === 1) {
-                      ctx.fillStyle = 'black';
-                      ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
-                  }
-              }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < numRows; i++) {
+          for (let j = 0; j < numCols; j++) {
+            if (grid[i][j] === 1) {
+              ctx.fillStyle = 'white';
+              ctx.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
+            }
           }
+        }
       }
 
-      // Function to update the grid based on Conway's rules
       function updateGrid() {
-          const newGrid = [];
-          for (let i = 0; i < numRows; i++) {
-              newGrid[i] = [];
-              for (let j = 0; j < numCols; j++) {
-                  const neighbors = countNeighbors(i, j);
-                  if (grid[i][j] === 1 && (neighbors < 2 || neighbors > 3)) {
-                      newGrid[i][j] = 0; // Underpopulation or overpopulation
-                  } else if (grid[i][j] === 0 && neighbors === 3) {
-                      newGrid[i][j] = 1; // Reproduction
-                  } else {
-                      newGrid[i][j] = grid[i][j]; // Unchanged
-                  }
-              }
+        const newGrid = [];
+        for (let i = 0; i < numRows; i++) {
+          newGrid[i] = [];
+          for (let j = 0; j < numCols; j++) {
+            const neighbors = countNeighbors(i, j);
+            if (grid[i][j] === 1 && (neighbors < 2 || neighbors > 3)) {
+              newGrid[i][j] = 0;
+            } else if (grid[i][j] === 0 && neighbors === 3) {
+              newGrid[i][j] = 1;
+            } else {
+              newGrid[i][j] = grid[i][j];
+            }
           }
-          grid = newGrid;
+        }
+        grid = newGrid;
       }
 
-      // Function to count live neighbors of a cell
       function countNeighbors(row, col) {
-          let count = 0;
-          for (let i = -1; i <= 1; i++) {
-              for (let j = -1; j <= 1; j++) {
-                  const r = row + i;
-                  const c = col + j;
-                  if (r >= 0 && r < numRows && c >= 0 && c < numCols && !(i === 0 && j === 0)) {
-                      count += grid[r][c];
-                  }
-              }
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+          for (let j = -1; j <= 1; j++) {
+            const r = row + i;
+            const c = col + j;
+            if (r >= 0 && r < numRows && c >= 0 && c < numCols && !(i === 0 && j === 0)) {
+              count += grid[r][c];
+            }
           }
-          return count;
+        }
+        return count;
       }
 
-      // Allow user to toggle cells by clicking on the canvas
       canvas.addEventListener('click', function(event) {
-          const rect = canvas.getBoundingClientRect();
-          const x = event.clientX - rect.left;
-          const y = event.clientY - rect.top;
-          const col = Math.floor(x / cellSize);
-          const row = Math.floor(y / cellSize);
-          // Toggle the state of the clicked cell
-          grid[row][col] = grid[row][col] === 1 ? 0 : 1;
-          drawGrid();
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const col = Math.floor(x / cellSize);
+        const row = Math.floor(y / cellSize);
+        grid[row][col] = grid[row][col] === 1 ? 0 : 1;
+        drawGrid();
       });
 
-      // Create a Tone.js synth to generate sound
       const synth = new Tone.Synth().toDestination();
 
-      // Map the count of live cells to a frequency between 200 Hz and 800 Hz
       function mapAliveToFreq(aliveCount) {
-          const totalCells = numRows * numCols;
-          const minFreq = 200;
-          const maxFreq = 800;
-          return minFreq + (aliveCount / totalCells) * (maxFreq - minFreq);
+        const totalCells = numRows * numCols;
+        const minFreq = 200;
+        const maxFreq = 1000;
+        return minFreq + (aliveCount / totalCells) * (maxFreq - minFreq);
       }
 
-      // Main loop: update grid, draw grid, and trigger sound based on live cell density
       function mainLoop() {
-          // Count live cells
-          let aliveCount = 0;
-          for (let i = 0; i < numRows; i++) {
-              for (let j = 0; j < numCols; j++) {
-                  if (grid[i][j] === 1) aliveCount++;
-              }
+        let aliveCount = 0;
+        for (let i = 0; i < numRows; i++) {
+          for (let j = 0; j < numCols; j++) {
+            if (grid[i][j] === 1) aliveCount++;
           }
-          // Map the live cell count to a frequency and trigger a short note ("8n" duration)
-          const freq = mapAliveToFreq(aliveCount);
-          synth.triggerAttackRelease(freq, "8n");
+        }
+        const freq = mapAliveToFreq(aliveCount);
+        synth.triggerAttackRelease(freq, "8n");
 
-          updateGrid();
-          drawGrid();
+        updateGrid();
+        drawGrid();
 
-          if (isRunning) {
-              animationId = requestAnimationFrame(mainLoop);
-          }
+        if (isRunning) {
+          animationId = requestAnimationFrame(mainLoop);
+        }
       }
 
       document.getElementById('startButton').addEventListener('click', function() {
-          if (!isRunning) {
-              isRunning = true;
-              mainLoop();
-          }
+        if (!isRunning) {
+          isRunning = true;
+          mainLoop();
+        }
       });
 
       document.getElementById('pauseButton').addEventListener('click', function() {
-          isRunning = false;
-          cancelAnimationFrame(animationId);
+        isRunning = false;
+        cancelAnimationFrame(animationId);
       });
 
       document.getElementById('restartButton').addEventListener('click', function() {
-          isRunning = false;
-          cancelAnimationFrame(animationId);
-          grid = createGrid();
-          drawGrid();
+        isRunning = false;
+        cancelAnimationFrame(animationId);
+        grid = createGrid();
+        drawGrid();
       });
 
-      // Initial draw
       drawGrid();
     </script>
   </body>
