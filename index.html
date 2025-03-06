@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game of Life</title>
+    <title>♪Game of Life♪</title>
     <style>
       canvas {
         border: 1px solid white;
@@ -25,6 +25,7 @@
         padding: 10px 20px;
         background-color: black;
         color: white;
+        transition: background-color 0.3s, color 0.3s;
       }
 
       button:hover {
@@ -54,10 +55,44 @@
         background-color: white;
         color: black;
       }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+      }
+
+      input[type="range"]:focus {
+        outline: none;
+      }
+
+
+      input[type="range"]::-webkit-slider-runnable-track {
+        background: white;
+        height: 5px;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 15px;
+        width: 15px;
+        background: white;
+        margin-top: -5px;
+        border-radius: 50%;
+      }
+
+      #speed {
+        color: white;
+        opacity: 0.7;
+        cursor: pointer;
+        background: white;
+      }
+
+      #speed:hover {
+        opacity: 1;
+      }
     </style>
   </head>
   <body>
-    <h1>Game of Life</h1>
+    <h1>Game of Life ♪</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <br />
     <input type="checkbox" id="rulesButton" style="display: none;">
@@ -65,6 +100,11 @@
     <button id="startButton">Start</button>
     <button id="pauseButton">Pause</button>
     <button id="restartButton">Restart</button>
+    <br><br>
+    <div class="slider">
+      <label for="speed">Play Speed</label>
+      <input type="range" id="speed" min="50" max="500" value="225" step="50">
+    </div>
     <div class="rules">
       <!-- Rules are from this link: https://beltoforion.de/en/game_of_life/ -->
       <p>In the <i>Game of Life</i> each grid cell can have either one of two states: <b>dead or alive</b>. <i>The Game of Life</i> is controlled by <b>four</b> simple rules which are applied to each grid cell in the simulation domain:</p>
@@ -81,10 +121,6 @@
         4. A dead cell will be brought back to live if it has exactly three live neighbors.
       </p>
     </div>
-    <div id="count">
-      count
-    </div>
-
     <script src="https://unpkg.com/tone/build/Tone.js"></script>
 
     <script>
@@ -191,12 +227,11 @@
         updateGrid();
         color = "rgba(255, 255, 255," + aliveCount / 800 + ")";
 
-        const count = document.getElementById("count");
-        count.textContent = aliveCount;
         drawGrid(color);
 
         if (isRunning) {
-          animationId = requestAnimationFrame(mainLoop);
+          let delay = parseInt(speed.max, 10) + parseInt(speed.min, 10) - parseInt(speed.value, 10);
+          setTimeout(mainLoop, delay);
         }
       }
 
@@ -209,12 +244,10 @@
 
       document.getElementById('pauseButton').addEventListener('click', function() {
         isRunning = false;
-        cancelAnimationFrame(animationId);
       });
 
       document.getElementById('restartButton').addEventListener('click', function() {
         isRunning = false;
-        cancelAnimationFrame(animationId);
         grid = createGrid();
         drawGrid("white");
       });
