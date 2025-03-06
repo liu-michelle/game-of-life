@@ -89,7 +89,6 @@
       #speed:hover {
         opacity: 1;
       }
-      
     </style>
   </head>
   <body>
@@ -199,7 +198,14 @@
         const col = Math.floor(x / cellSize);
         const row = Math.floor(y / cellSize);
         grid[row][col] = grid[row][col] === 1 ? 0 : 1;
-        drawGrid("white");
+        let aliveCount = 0;
+        for (let i = 0; i < numRows; i++) {
+          for (let j = 0; j < numCols; j++) {
+            if (grid[i][j] === 1) aliveCount++;
+          }
+        }
+        color = "rgba(255, 255, 255," + aliveCount / 800 + ")";
+        drawGrid(color);
       });
 
       const synth = new Tone.Synth().toDestination();
@@ -222,7 +228,8 @@
           }
         }
         const freq = map(aliveCount);
-        synth.triggerAttackRelease(freq, "4n");
+        v = aliveCount / 1500;
+        if (Math.random() < v) synth.triggerAttackRelease(freq, "8n");
 
         updateGrid();
         color = "rgba(255, 255, 255," + aliveCount / 800 + ")";
