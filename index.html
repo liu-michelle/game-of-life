@@ -229,6 +229,7 @@
         }
         const freq = map(aliveCount);
         v = aliveCount / 1500;
+        synth.volume.value =  -1 * aliveCount / 80;
         if (Math.random() < v) synth.triggerAttackRelease(freq, "8n");
 
         updateGrid();
