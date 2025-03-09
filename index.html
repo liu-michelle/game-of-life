@@ -363,6 +363,7 @@
             if (grid[i][j] === 1) aliveCount++;
           }
         }
+
         const freq = map(aliveCount);
         v = aliveCount / 1500;
         synth.volume.value = -50 + 50 * (Math.log2(aliveCount + 1) / Math.log2(1501));
@@ -399,17 +400,26 @@
       document.getElementById('startButton').addEventListener('click', function() {
         if (!isRunning) {
           isRunning = true;
+          Tone.getTransport().start()
+          Tone.Transport.bpm.value = 120;
+        synth1 = new Tone.Synth().toDestination();
+        function play () {
+          synth1.triggerAttackRelease('C3', '1n')
+        }
+        new Tone.Loop(play, "1n").start();
           mainLoop();
         }
       });
 
       document.getElementById('pauseButton').addEventListener('click', function() {
         isRunning = false;
+        Tone.getTransport().stop()
       });
 
       document.getElementById('patternButton').addEventListener('click', function() {
         isRunning = false;
         index = Math.floor(Math.random() * (3))
+        Tone.getTransport().stop()
         if (index === 0) {
           grid = gliders();
           drawGrid("red");
@@ -435,6 +445,7 @@
 
       document.getElementById('restartButton').addEventListener('click', function() {
         isRunning = false;
+        Tone.getTransport().stop()
         grid = createGrid();
         drawGrid("red");
         document.getElementById('startButton').style.color = "red";
