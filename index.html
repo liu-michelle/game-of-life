@@ -100,6 +100,7 @@
     <button id="startButton">Start</button>
     <button id="pauseButton">Pause</button>
     <button id="restartButton">Restart</button>
+    <button id="patternButton">Patterns</button>
     <br><br>
     <div class="slider">
       <label for="speed">Play Speed</label>
@@ -140,6 +141,107 @@
             grid[i][j] = Math.random() > 0.7 ? 1 : 0;
           }
         }
+        return grid;
+      }
+      
+      //i asked chatgpt to help me make these patterns
+      function gliders() {
+        const grid = Array.from({
+          length: 60
+        }, () => Array(80).fill(0));
+
+        function placeGlider(x, y) {
+          if (x + 2 < 80 && y + 2 < 60) {
+            grid[y][x + 1] = 1;
+            grid[y + 1][x + 2] = 1;
+            grid[y + 2][x] = 1;
+            grid[y + 2][x + 1] = 1;
+            grid[y + 2][x + 2] = 1;
+          }
+        }
+
+        for (let y = 0; y < 60; y += 5) {
+          for (let x = 0; x < 80; x += 5) {
+            placeGlider(x, y);
+          }
+        }
+
+        return grid;
+
+      }
+
+      function oscillator() {
+        const grid = Array.from({
+          length: 60
+        }, () => Array(80).fill(0));
+
+        function placePulsar(x, y) {
+          const offsets = [
+            [0, 2],
+            [0, 3],
+            [0, 4],
+            [2, 0],
+            [3, 0],
+            [4, 0],
+            [5, 2],
+            [5, 3],
+            [5, 4],
+            [2, 5],
+            [3, 5],
+            [4, 5],
+            [-1, 2],
+            [-1, 3],
+            [-1, 4],
+            [2, -1],
+            [3, -1],
+            [4, -1],
+            [6, 2],
+            [6, 3],
+            [6, 4],
+            [2, 6],
+            [3, 6],
+            [4, 6]
+          ];
+
+          for (let [dx, dy] of offsets) {
+            if (x + dx >= 0 && x + dx < 80 && y + dy >= 0 && y + dy < 60) {
+              grid[y + dy][x + dx] = 1;
+            }
+          }
+        }
+
+        for (let y = 10; y < 60; y += 10) {
+          for (let x = 10; x < 80; x += 10) {
+            placePulsar(x, y);
+          }
+        }
+
+        return grid;
+      }
+
+      function blocks() {
+        const grid = Array.from({
+          length: 60
+        }, () => Array(80).fill(0));
+
+        function placeBlock(x, y) {
+          const block = [
+            [0, 0],
+            [0, 1],
+            [1, 0],
+            [1, 1]
+          ];
+          block.forEach(([dx, dy]) => {
+            if (x + dx < 80 && y + dy < 60) grid[y + dy][x + dx] = 1;
+          });
+        }
+
+        for (let y = 5; y < 55; y += 5) {
+          for (let x = 5; x < 75; x += 5) {
+            placeBlock(x, y);
+          }
+        }
+
         return grid;
       }
 
@@ -226,16 +328,16 @@
       });
 
       const synth = new Tone.Synth({
-          oscillator: {
-            type: "square",
-          },
-          envelope: {
-            attack: 0.01,
-            decay: 0.08,
-            sustain: 0.1,
-            release: 0.1,
-          }
-        }).toDestination();
+        oscillator: {
+          type: "square",
+        },
+        envelope: {
+          attack: 0.01,
+          decay: 0.08,
+          sustain: 0.1,
+          release: 0.1,
+        }
+      }).toDestination();
 
 
       function map(aliveCount) {
@@ -278,6 +380,7 @@
         document.getElementById('restartButton').style.color = color;
         document.querySelector("h1").style.color = color;
         document.querySelector("label[for='speed']").style.color = color;
+        document.getElementById('patternButton').style.color = color;
         document.querySelector("label[for='rulesButton']").style.color = color;
         document.querySelectorAll("p").forEach(function(paragraph) {
           paragraph.style.color = color;
@@ -305,6 +408,31 @@
 
       });
 
+      document.getElementById('patternButton').addEventListener('click', function() {
+        isRunning = false;
+        index = Math.floor(Math.random() * (3))
+        if (index === 0) {
+          grid = gliders();
+          drawGrid("red");
+        }
+
+        if (index === 1) {
+          grid = oscillators();
+          drawGrid("red");
+        } else {
+          grid = blocks();
+          drawGrid("red");
+        }
+        document.getElementById('startButton').style.color = "red";
+        document.getElementById('pauseButton').style.color = "red";
+        document.getElementById('restartButton').style.color = "red";
+        document.getElementById('patternButton').style.color = "red";
+        document.querySelector("h1").style.color = "red";
+        document.querySelector("label[for='speed']").style.color = "red";
+        document.querySelector("p").style.color = "red";
+        document.querySelector("label[for='rulesButton']").style.color = "red";
+      });
+
       document.getElementById('restartButton').addEventListener('click', function() {
         isRunning = false;
         grid = createGrid();
@@ -312,6 +440,7 @@
         document.getElementById('startButton').style.color = "red";
         document.getElementById('pauseButton').style.color = "red";
         document.getElementById('restartButton').style.color = "red";
+        document.getElementById('patternButton').style.color = "red";
         document.querySelector("h1").style.color = "red";
         document.querySelector("label[for='speed']").style.color = "red";
         document.querySelector("p").style.color = "red";
