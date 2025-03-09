@@ -246,8 +246,10 @@
         document.getElementById('pauseButton').style.color = color;
         document.getElementById('restartButton').style.color = color;
         document.querySelector("h1").style.color = color;
-        document.querySelector("label[for='speed']").style.color = color;
-        document.querySelector("label[for='rulesButton']").style.color = color;
+        document.querySelector("label[for='speed']").style.color = color; document.querySelector("label[for='rulesButton']").style.color = color;
+document.querySelectorAll("p").forEach(function(paragraph) {
+  paragraph.style.color = color;
+});
 
 
         if (isRunning) {
@@ -265,20 +267,23 @@
 
       document.getElementById('pauseButton').addEventListener('click', function() {
         isRunning = false;
-        
+
       });
 
       document.getElementById('restartButton').addEventListener('click', function() {
         isRunning = false;
         grid = createGrid();
         drawGrid("red");
-                document.getElementById('startButton').style.color = "red";
+        document.getElementById('startButton').style.color = "red";
         document.getElementById('pauseButton').style.color = "red";
         document.getElementById('restartButton').style.color = "red";
         document.querySelector("h1").style.color = "red";
         document.querySelector("label[for='speed']").style.color = "red";
-        document.querySelector("label[for='rulesButton']").style.color = "red";
+       document.querySelector("p").style.color = "red"; document.querySelector("label[for='rulesButton']").style.color = "red";
       });
+      document.querySelectorAll("p").forEach(function(paragraph) {
+  paragraph.style.color = "red";
+});
 
 
       drawGrid("red");
