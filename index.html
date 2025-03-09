@@ -210,19 +210,49 @@
         blue = Math.max(0, 255 - red);
         color = `rgb(${red}, 0, ${blue})`;
         drawGrid(color);
+        const synth = new Tone.Synth({
+          oscillator: {
+            type: "square",
+          },
+          envelope: {
+            attack: 0.01,
+            decay: 0.05,
+            sustain: 0.1,
+            release: 0.1,
+          }
+        }).toDestination();
+
+        synth.triggerAttackRelease("C2", "16n");
       });
 
-      const synth = new Tone.Synth().toDestination();
+      const synth = new Tone.Synth({
+          oscillator: {
+            type: "square",
+          },
+          envelope: {
+            attack: 0.01,
+            decay: 0.08,
+            sustain: 0.1,
+            release: 0.1,
+          }
+        }).toDestination();
+
 
       function map(aliveCount) {
         const totalCells = numRows * numCols;
+
         let notes = [
           'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
           'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
           'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
-        ]
-        return notes[aliveCount % 10];
+          'C6', 'D6', 'E6', 'F6', 'G6', 'A6', 'B6'
+        ];
+
+        let index = Math.floor((aliveCount / 1500) * (notes.length - 1));
+
+        return notes[index];
       }
+
 
       function mainLoop() {
         let aliveCount = 0;
@@ -247,10 +277,14 @@
         document.getElementById('pauseButton').style.color = color;
         document.getElementById('restartButton').style.color = color;
         document.querySelector("h1").style.color = color;
-        document.querySelector("label[for='speed']").style.color = color; document.querySelector("label[for='rulesButton']").style.color = color;
+        document.querySelector("label[for='speed']").style.color = color;
+        document.querySelector("label[for='rulesButton']").style.color = color;
         document.querySelectorAll("p").forEach(function(paragraph) {
           paragraph.style.color = color;
         });
+        document.getElementById('gameCanvas').style.borderColor = color;
+        document.getElementById('gameCanvas').style.boxShadow = `0px 0px 20px ${color}`;
+
 
 
         if (isRunning) {
@@ -280,11 +314,13 @@
         document.getElementById('restartButton').style.color = "red";
         document.querySelector("h1").style.color = "red";
         document.querySelector("label[for='speed']").style.color = "red";
-       document.querySelector("p").style.color = "red"; document.querySelector("label[for='rulesButton']").style.color = "red";
+        document.querySelector("p").style.color = "red";
+        document.querySelector("label[for='rulesButton']").style.color = "red";
       });
       document.querySelectorAll("p").forEach(function(paragraph) {
-  paragraph.style.color = "red";
-});
+        paragraph.style.color = "red";
+      });
+      document.getElementById('gameCanvas').style.borderColor = "red";
 
 
       drawGrid("red");
