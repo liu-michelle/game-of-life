@@ -147,6 +147,8 @@
       let isRunning = false;
 
       function drawGrid(color) {
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = color;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let i = 0; i < numRows; i++) {
           for (let j = 0; j < numCols; j++) {
@@ -204,7 +206,9 @@
             if (grid[i][j] === 1) aliveCount++;
           }
         }
-        color = "rgba(255, 255, 255," + aliveCount / 800 + ")";
+        red = Math.min(255, Math.floor((aliveCount / 1500) * 255));
+        blue = Math.max(0, 255 - red);
+        color = `rgb(${red}, 0, ${blue})`;
         drawGrid(color);
       });
 
@@ -229,13 +233,22 @@
         }
         const freq = map(aliveCount);
         v = aliveCount / 1500;
-        synth.volume.value =  -1 * aliveCount / 80;
+        synth.volume.value = -1 * aliveCount / 80;
         if (Math.random() < v) synth.triggerAttackRelease(freq, "8n");
 
         updateGrid();
-        color = "rgba(255, 255, 255," + aliveCount / 800 + ")";
+        red = Math.min(255, Math.floor((aliveCount / 1500) * 255));
+        blue = Math.max(0, 255 - red);
+        color = `rgb(${red}, 0, ${blue})`;
 
         drawGrid(color);
+        document.getElementById('startButton').style.color = color;
+        document.getElementById('pauseButton').style.color = color;
+        document.getElementById('restartButton').style.color = color;
+        document.querySelector("h1").style.color = color;
+        document.querySelector("label[for='speed']").style.color = color;
+        document.querySelector("label[for='rulesButton']").style.color = color;
+
 
         if (isRunning) {
           let delay = parseInt(speed.max, 10) + parseInt(speed.min, 10) - parseInt(speed.value, 10);
@@ -252,15 +265,23 @@
 
       document.getElementById('pauseButton').addEventListener('click', function() {
         isRunning = false;
+        
       });
 
       document.getElementById('restartButton').addEventListener('click', function() {
         isRunning = false;
         grid = createGrid();
-        drawGrid("white");
+        drawGrid("red");
+                document.getElementById('startButton').style.color = "red";
+        document.getElementById('pauseButton').style.color = "red";
+        document.getElementById('restartButton').style.color = "red";
+        document.querySelector("h1").style.color = "red";
+        document.querySelector("label[for='speed']").style.color = "red";
+        document.querySelector("label[for='rulesButton']").style.color = "red";
       });
 
-      drawGrid("white");
+
+      drawGrid("red");
     </script>
   </body>
 </html>
