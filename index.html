@@ -147,6 +147,17 @@
         Tone.Transport.bpm.value = this.value;
       });
 
+      const synth = new Tone.Synth({
+  oscillator: { type: "square" },
+  envelope: {
+    attack: 0.01,
+    decay: 0.05,
+    sustain: 0.1,
+    release: 0.1,
+  }
+}).toDestination();
+
+
       function createGrid() {
         const grid = [];
         for (let i = 0; i < numRows; i++) {
@@ -326,17 +337,6 @@
         blue = Math.max(0, 255 - red);
         color = `rgb(${red}, 0, ${blue})`;
         drawGrid(color);
-        const synth = new Tone.Synth({
-          oscillator: {
-            type: "square",
-          },
-          envelope: {
-            attack: 0.01,
-            decay: 0.05,
-            sustain: 0.1,
-            release: 0.1,
-          }
-        }).toDestination();
 
         synth.triggerAttackRelease("C2", "16n");
       });
@@ -430,20 +430,20 @@
       document.getElementById('startButton').addEventListener('click', function() {
         if (!isRunning) {
           isRunning = true;
-          Tone.Transport().start()
+          Tone.getTransport().start()
           mainLoop();
         }
       });
 
       document.getElementById('pauseButton').addEventListener('click', function() {
         isRunning = false;
-        Tone.Transport().stop()
+        Tone.getTransport().stop()
       });
 
       document.getElementById('patternButton').addEventListener('click', function() {
         isRunning = false;
         index = Math.floor(Math.random() * (3))
-        Tone.Transport().stop()
+        Tone.getTransport().stop()
         if (index === 0) {
           grid = gliders();
           drawGrid("red");
