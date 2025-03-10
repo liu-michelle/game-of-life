@@ -3,12 +3,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport">
     <title>♪ Game of Life ♪</title>
     <style>
       canvas {
         border: 1px solid white;
         cursor: pointer;
+      }
+
+      @font-face {
+        font-family: 'pixelfont';
+        src: url('PixelEmulator-xq08.ttf');
       }
 
       body {
@@ -32,6 +37,10 @@
         background-color: white;
         color: black;
         filter: drop-shadow(3px 2px 2px gray);
+      }
+
+      h1 {
+        font-family: 'pixelfont';
       }
 
       .rules {
@@ -143,7 +152,7 @@
         }
         return grid;
       }
-      
+
       //i asked chatgpt to help me make these patterns
       function gliders() {
         const grid = Array.from({
@@ -354,7 +363,19 @@
 
         return notes[index];
       }
+    function updateUI(color) {
+      [startButton, pauseButton, restartButton, patternButton,  gameCanvas].forEach(el => el.style.color = color);
+      gameCanvas.style.borderColor = color;
+      gameCanvas.style.boxShadow = `0px 0px 20px ${color}`;
+              document.querySelector("h1").style.color = color;
+        document.querySelector("h1").style.textShadow = `${color} 3px 3px 5px`;
 
+        document.querySelector("label[for='speed']").style.color = color;
+        document.querySelector("label[for='rulesButton']").style.color = color;
+        document.querySelectorAll("p").forEach(function(paragraph) {
+          paragraph.style.color = color;
+        });
+    }
 
       function mainLoop() {
         let aliveCount = 0;
@@ -376,20 +397,7 @@
         color = `rgb(${red}, 0, ${blue})`;
 
         drawGrid(color);
-        document.getElementById('startButton').style.color = color;
-        document.getElementById('pauseButton').style.color = color;
-        document.getElementById('restartButton').style.color = color;
-        document.querySelector("h1").style.color = color;
-        document.querySelector("label[for='speed']").style.color = color;
-        document.getElementById('patternButton').style.color = color;
-        document.querySelector("label[for='rulesButton']").style.color = color;
-        document.querySelectorAll("p").forEach(function(paragraph) {
-          paragraph.style.color = color;
-        });
-        document.getElementById('gameCanvas').style.borderColor = color;
-        document.getElementById('gameCanvas').style.boxShadow = `0px 0px 20px ${color}`;
-
-
+        updateUI(color);
 
         if (isRunning) {
           let delay = parseInt(speed.max, 10) + parseInt(speed.min, 10) - parseInt(speed.value, 10);
@@ -397,16 +405,16 @@
         }
       }
 
+      function play() {
+        synth1.triggerAttackRelease('C3', '1n')
+      }
       document.getElementById('startButton').addEventListener('click', function() {
         if (!isRunning) {
           isRunning = true;
           Tone.getTransport().start()
           Tone.Transport.bpm.value = 120;
-        synth1 = new Tone.Synth().toDestination();
-        function play () {
-          synth1.triggerAttackRelease('C3', '1n')
-        }
-        new Tone.Loop(play, "1n").start();
+          synth1 = new Tone.Synth().toDestination();
+          new Tone.Loop(play, "1n").start();
           mainLoop();
         }
       });
@@ -423,46 +431,23 @@
         if (index === 0) {
           grid = gliders();
           drawGrid("red");
-        }
-
-        else if (index === 1) {
+        } else if (index === 1) {
           grid = oscillators();
           drawGrid("red");
-        } 
-        else {
+        } else {
           grid = blocks();
           drawGrid("red");
         }
-        document.getElementById('startButton').style.color = "red";
-        document.getElementById('pauseButton').style.color = "red";
-        document.getElementById('restartButton').style.color = "red";
-        document.getElementById('patternButton').style.color = "red";
-        document.querySelector("h1").style.color = "red";
-        document.querySelector("label[for='speed']").style.color = "red";
-        document.querySelector("p").style.color = "red";
-        document.querySelector("label[for='rulesButton']").style.color = "red";
+        updateUI("red");
       });
 
       document.getElementById('restartButton').addEventListener('click', function() {
         isRunning = false;
         Tone.getTransport().stop()
         grid = createGrid();
+        updateUI("red");
         drawGrid("red");
-        document.getElementById('startButton').style.color = "red";
-        document.getElementById('pauseButton').style.color = "red";
-        document.getElementById('restartButton').style.color = "red";
-        document.getElementById('patternButton').style.color = "red";
-        document.querySelector("h1").style.color = "red";
-        document.querySelector("label[for='speed']").style.color = "red";
-        document.querySelector("p").style.color = "red";
-        document.querySelector("label[for='rulesButton']").style.color = "red";
       });
-      document.querySelectorAll("p").forEach(function(paragraph) {
-        paragraph.style.color = "red";
-      });
-      document.getElementById('gameCanvas').style.borderColor = "red";
-
-
       drawGrid("red");
     </script>
   </body>
