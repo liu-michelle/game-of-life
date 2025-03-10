@@ -113,7 +113,7 @@
     <br><br>
     <div class="slider">
       <label for="speed">Play Speed</label>
-      <input type="range" id="speed" min="50" max="500" value="225" step="50">
+      <input type="range" id="speed" min="60" max="260" value="160" step="10">
     </div>
     <div class="rules">
       <!-- Rules are from this link: https://beltoforion.de/en/game_of_life/ -->
@@ -141,6 +141,11 @@
       const cellSize = 10;
       const numRows = Math.floor(canvas.height / cellSize);
       const numCols = Math.floor(canvas.width / cellSize);
+      const slider = document.getElementById("speed");
+      Tone.Transport.bpm.value = slider.value;
+      slider.addEventListener("input", function() {
+        Tone.Transport.bpm.value = this.value;
+      });
 
       function createGrid() {
         const grid = [];
@@ -349,10 +354,11 @@
       }).toDestination();
 
 
-      function map(aliveCount) {
+      function map1(aliveCount) {
         const totalCells = numRows * numCols;
 
         let notes = [
+          'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
           'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
           'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
           'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
@@ -360,9 +366,25 @@
         ];
 
         let index = Math.floor((aliveCount / 1500) * (notes.length - 1));
+        index = Math.max(0, Math.min(index, notes.length - 1));
 
         return notes[index];
       }
+
+      function map2(aliveCount) {
+    const notes = [
+    'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
+    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'
+    ];
+
+    let index = Math.floor((aliveCount / 1500) * (notes.length - 1));
+    index = Math.max(0, Math.min(index, notes.length - 1));
+
+    return notes[index];
+}
+
+      
+
     function updateUI(color) {
       [startButton, pauseButton, restartButton, patternButton,  gameCanvas].forEach(el => el.style.color = color);
       gameCanvas.style.borderColor = color;
@@ -385,11 +407,14 @@
           }
         }
 
-        const freq = map(aliveCount);
-        v = aliveCount / 1500;
+        const freq1 = map1(aliveCount);
+        v = aliveCount / 1300;
         synth.volume.value = -50 + 50 * (Math.log2(aliveCount + 1) / Math.log2(1501));
 
-        if (Math.random() < v) synth.triggerAttackRelease(freq, "8n");
+        if (Math.random() < v) synth.triggerAttackRelease(freq1, "4n");
+        const freq2 = map2(aliveCount);
+        synth1 = new Tone.Synth().toDestination();
+        synth1.triggerAttackRelease(freq2, '1n');
 
         updateGrid();
         red = Math.min(255, Math.floor((aliveCount / 1500) * 255));
@@ -400,21 +425,15 @@
         updateUI(color);
 
         if (isRunning) {
-          let delay = parseInt(speed.max, 10) + parseInt(speed.min, 10) - parseInt(speed.value, 10);
+          let delay = (60 / Tone.Transport.bpm.value) * 1000;
           setTimeout(mainLoop, delay);
         }
       }
 
-      function play() {
-        synth1.triggerAttackRelease('C3', '1n')
-      }
       document.getElementById('startButton').addEventListener('click', function() {
         if (!isRunning) {
           isRunning = true;
           Tone.getTransport().start()
-          Tone.Transport.bpm.value = 120;
-          synth1 = new Tone.Synth().toDestination();
-          new Tone.Loop(play, "1n").start();
           mainLoop();
         }
       });
