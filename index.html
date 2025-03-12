@@ -8,7 +8,7 @@
     <style>
       canvas {
         border: 1px solid white;
-        cursor: pointer;
+        cursor: url('cursor.cur') 5 5, auto;
       }
 
       @font-face {
@@ -22,6 +22,8 @@
         padding: 20px;
         background-color: black;
         color: white;
+        cursor: url('cursor.cur') 5 5, auto;
+        background: linear-gradient(#000000 68%, #13194a 100%);
       }
 
       button {
@@ -31,6 +33,7 @@
         background-color: black;
         color: white;
         transition: background-color 0.3s, color 0.3s;
+        cursor: url('cursor.cur') 5 5, auto;
       }
 
       button:hover {
@@ -56,27 +59,31 @@
         padding: 10px 20px;
         background-color: black;
         color: white;
-        cursor: pointer;
+        cursor: url('cursor.cur') 5 5, auto;
         transition: background-color 0.3s, color 0.3s;
       }
 
       label[for="rulesButton"]:hover {
         background-color: white;
         color: black;
+        cursor: url('cursor.cur') 5 5, auto;
       }
 
       input[type="range"] {
         -webkit-appearance: none;
+        cursor: url('cursor.cur') 5 5, auto;
       }
 
       input[type="range"]:focus {
         outline: none;
+        cursor: url('cursor.cur') 5 5, auto;
       }
 
 
       input[type="range"]::-webkit-slider-runnable-track {
         background: white;
         height: 5px;
+        cursor: url('cursor.cur') 5 5, auto;
       }
 
       input[type="range"]::-webkit-slider-thumb {
@@ -86,23 +93,32 @@
         background: white;
         margin-top: -5px;
         border-radius: 50%;
+        cursor: url('cursor.cur') 5 5, auto;
       }
 
       #speed {
         color: white;
         opacity: 0.7;
-        cursor: pointer;
+        cursor: url('cursor.cur') 5 5, auto;
         background: white;
       }
 
       #speed:hover {
         opacity: 1;
       }
+      
+      label[for="speed"] {
+        cursor: url('cursor.cur') 5 5, auto;
+      }
+      
     </style>
   </head>
   <body>
     <h1>♪ Game of Life ♪</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="game">
+      
+    </div>
     <br />
     <input type="checkbox" id="rulesButton" style="display: none;">
     <label for="rulesButton">Rules</label>
