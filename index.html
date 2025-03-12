@@ -20,10 +20,9 @@
         font-family: Monospace, sans-serif;
         text-align: center;
         padding: 20px;
-        background-color: black;
         color: white;
         cursor: url('cursor.cur') 5 5, auto;
-        background: linear-gradient(#000000 68%, #13194a 100%);
+        background: black;
       }
 
       button {
@@ -106,18 +105,17 @@
       #speed:hover {
         opacity: 1;
       }
-      
+
       label[for="speed"] {
         cursor: url('cursor.cur') 5 5, auto;
       }
-      
     </style>
   </head>
   <body>
     <h1>♪ Game of Life ♪</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <div class="game">
-      
+    <div class="game">
+
     </div>
     <br />
     <input type="checkbox" id="rulesButton" style="display: none;">
@@ -166,15 +164,17 @@
       const chorus = new Tone.Chorus(2, 2, 0.5).toDestination();
 
       const synth = new Tone.Synth({
-  oscillator: { type: "square" },
-  envelope: {
-    attack: 0.01,
-    decay: 0.05,
-    sustain: 0.1,
-    release: 0.1,
-  }
-}).chain(chorus);
-      
+        oscillator: {
+          type: "square"
+        },
+        envelope: {
+          attack: 0.01,
+          decay: 0.05,
+          sustain: 0.1,
+          release: 0.1,
+        }
+      }).chain(chorus);
+
 
 
       function createGrid() {
@@ -378,32 +378,33 @@
       }
 
       function map2(aliveCount) {
-    const notes = [
-    'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
-    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'
-    ];
+        const notes = [
+          'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
+          'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'
+        ];
 
-    let index = Math.floor((aliveCount / 1400) * (notes.length - 1));
-    index = Math.max(0, Math.min(index, notes.length - 1));
+        let index = Math.floor((aliveCount / 1400) * (notes.length - 1));
+        index = Math.max(0, Math.min(index, notes.length - 1));
 
-    return notes[index];
-}
+        return notes[index];
+      }
 
-      
 
-    function updateUI(color) {
-      [startButton, pauseButton, restartButton, patternButton,  gameCanvas].forEach(el => el.style.color = color);
-      gameCanvas.style.borderColor = color;
-      gameCanvas.style.boxShadow = `0px 0px 30px ${color}`;
-              document.querySelector("h1").style.color = color;
+
+      function updateUI(color) {
+        [startButton, pauseButton, restartButton, patternButton, gameCanvas].forEach(el => el.style.color = color);
+        gameCanvas.style.borderColor = color;
+        gameCanvas.style.boxShadow = `0px 0px 30px ${color}`;
+        document.querySelector("h1").style.color = color;
         document.querySelector("h1").style.textShadow = `${color} 3px 3px 5px`;
 
         document.querySelector("label[for='speed']").style.color = color;
         document.querySelector("label[for='rulesButton']").style.color = color;
+        document.body.style.background = `linear-gradient(#000000 95%, ${color} 100%)`;
         document.querySelectorAll("p").forEach(function(paragraph) {
           paragraph.style.color = color;
         });
-    }
+      }
 
       function mainLoop() {
         let aliveCount = 0;
@@ -427,16 +428,16 @@
         if (Math.random() < v) synth.triggerAttackRelease(freq1, "4n");
         const freq2 = map2(aliveCount);
         const synth1 = new Tone.Synth({
-        oscillator: {
-          type: "square",
-        },
-        envelope: {
-          attack: 0.01,
-          decay: 0.08,
-          sustain: 0.1,
-          release: 0.1,
-        }
-      }).chain(chorus);
+          oscillator: {
+            type: "square",
+          },
+          envelope: {
+            attack: 0.01,
+            decay: 0.08,
+            sustain: 0.1,
+            release: 0.1,
+          }
+        }).chain(chorus);
         synth1.triggerAttackRelease(freq2, '1n');
 
         updateGrid();
